@@ -4,13 +4,16 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "keygen": "ts-node ./keygen",
-    "airdrop": "ts-node ./airdrop",
-    "transfer": "ts-node ./transfer",
-    "enroll": "ts-node ./enroll"
+    "keygen": "ts-node ./pre-req/keygen",
+    "airdrop": "ts-node ./pre-req/airdrop",
+    "transfer": "ts-node ./pre-req/transfer",
+    "enroll": "ts-node ./pre-req/enroll",
+    "spl_init": "ts-node ./cluster/spl_init",
+    "spl_mint" : "ts-node ./cluster/spl_mint"
   },
   "dependencies": {
     "@project-serum/anchor": "^0.26.0",
+    "@solana/spl-token": "^0.3.8",
     "@solana/web3.js": "^1.78.4",
     "@types/node": "^20.5.0",
     "bs58": "^5.0.0",
