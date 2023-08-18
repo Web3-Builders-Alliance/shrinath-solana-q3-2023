@@ -7,7 +7,7 @@ const commitment : Commitment = "confirmed";
 const connection = new Connection("https://api.devnet.solana.com",commitment);
 const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
 const vault_state = Keypair.generate();
-console.log(vault_state);
+console.log(vault_state.publicKey.toBase58());
 const provider = new AnchorProvider(connection, new Wallet(keypair), {commitment});
 const program = new Program<WbaVault>(IDL, "D51uEDHLbWAxNfodfQDv7qkp8WZtxrhi3uganGbNos7o",provider);
 const vaultAuth = PublicKey.findProgramAddressSync([Buffer.from("auth"),vault_state.publicKey.toBuffer()],program.programId)[0];
