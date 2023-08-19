@@ -14,7 +14,8 @@
     "spl_transfer": "ts-node ./cluster/spl_transfer",
     "vault_init": "ts-node ./vault/vault_init",
     "vault_deposit": "ts-node ./vault/vault_deposit",
-    "vault_withdraw": "ts-node ./vault/vault_withdraw"
+    "vault_withdraw": "ts-node ./vault/vault_withdraw",
+    "vault_deposit_spl": "ts-node ./vault/vault_deposit_spl"
 
   },
   "dependencies": {
