@@ -12,8 +12,9 @@
     "spl_mint": "ts-node ./cluster/spl_mint",
     "spl_metadata": "ts-node ./cluster/spl_metadata",
     "spl_transfer": "ts-node ./cluster/spl_transfer",
-    "vault_init":"ts-node ./vault/vault_init",
-    "vault_deposit":"ts-node ./vault/vault_deposit"
+    "vault_init": "ts-node ./vault/vault_init",
+    "vault_deposit": "ts-node ./vault/vault_deposit",
+    "vault_withdraw": "ts-node ./vault/vault_withdraw"
 
   },
   "dependencies": {
