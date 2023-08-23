@@ -33,3 +33,5 @@ const metaplex = Metaplex.make(connection)
         console.log(`something went wrong : ${error}`)
     }
 })();
+
+// mint = https://explorer.solana.com/address/GqVXkAgPrxYwucqBLL3ro5Zxhtu2TREnpCwZ1S9oSDzf/metadata?cluster=devnet
