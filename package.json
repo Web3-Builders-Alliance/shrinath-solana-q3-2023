@@ -18,7 +18,8 @@
     "vault_deposit_spl": "ts-node ./vault/vault_deposit_spl",
     "vault_withdraw_spl": "ts-node ./vault/vault_withdraw_spl",
     "nft_image": "ts-node ./nft/nft_image",
-    "nft_metadata": "ts-node ./nft/nft_metadata"
+    "nft_metadata": "ts-node ./nft/nft_metadata",
+    "nft_mint": "ts-node ./nft/nft_mint"
   },
   "dependencies": {
     "@metaplex-foundation/js": "^0.19.4",
