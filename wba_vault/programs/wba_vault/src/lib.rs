@@ -1,6 +1,12 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::transfer;
 use anchor_lang::system_program::Transfer;
+use anchor_spl::associated_token::AssociatedToken;
+use anchor_spl::token::Mint;
+use anchor_spl::token::Token;
+use anchor_spl::token::TokenAccount;
+use anchor_spl::token::transfer as spl_transfer;
+use anchor_spl::token::Transfer as SplTransfer;
 
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
@@ -45,6 +51,19 @@ pub mod wba_vault {
         );
         transfer(cpi, amount)
     }
+
+    pub fn spl_deposit(ctx: Context<SplDeposit>, amount: u64) -> Result<()> {
+        let ctx_accounts = SplTransfer {
+            from : ctx.accounts.owner_ata.to_account_info(),
+            to : ctx.accounts.vault.to_account_info(),
+            authority:ctx.accounts.owner.to_account_info(),
+        };
+        let cpi = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            ctx_accounts
+        );
+        spl_transfer(cpi, amount)
+    }
 }
 
 #[derive(Accounts)]
@@ -63,6 +82,7 @@ pub struct Initialize <'info> {
         seeds = [b"auth", state.key().as_ref()],
         bump
     )]
+    // Check: This is safe
     auth : UncheckedAccount<'info>,
     #[account(
         seeds = [b"vault", state.key().as_ref()],
@@ -89,6 +109,43 @@ pub struct Payment <'info> {
     )]
     vault : SystemAccount<'info>,
     system_program : Program<'info,System>,
+
+}
+
+#[derive(Accounts)]
+pub struct SplDeposit <'info> {
+    #[account(mut)]
+    owner: Signer<'info>,
+    #[account(
+        seeds = [b"state", owner.key().as_ref()],
+        bump = state.state_bump,
+    )]
+    state : Account<'info, VaultState>,
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = owner,
+    )]
+    owner_ata : Account<'info, TokenAccount>,
+    mint : Account<'info, Mint>,
+    #[account(
+        seeds = [b"auth", state.key().as_ref()],
+        bump = state.auth_bump,
+    )]
+    // Check: This is safe
+    auth : UncheckedAccount<'info>,
+    #[account(
+        init,
+        payer = owner,
+        seeds = [b"spl_vault", state.key().as_ref()],
+        token::mint = mint,
+        token::authority = owner,
+        bump
+    )]
+    vault : Account<'info, TokenAccount>,
+    token_program : Program<'info, Token>,
+    associated_token_program : Program<'info, AssociatedToken>,
+    system_program : Program<'info, System>
 
 }
 
