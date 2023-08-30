@@ -21,7 +21,28 @@ pub mod wba_vault {
             from : ctx.accounts.owner.to_account_info(),
             to : ctx.accounts.vault.to_account_info(),
         };
-        let cpi = CpiContext::new(ctx.accounts.system_program.to_account_info(), ctx_accounts);
+        let cpi = CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            ctx_accounts
+        );
+        transfer(cpi, amount)
+    }
+    pub fn withdraw(ctx: Context<Payment>, amount: u64) -> Result<()> {
+        let ctx_accounts = Transfer {
+            to : ctx.accounts.owner.to_account_info(),
+            from : ctx.accounts.vault.to_account_info(),
+        };
+        let seeds : &[&[u8]; 3] = &[
+            b"vault",
+            ctx.accounts.owner.to_account_info().key.as_ref(),
+            &[ctx.accounts.state.vault_bump],
+        ];
+        let pda_signer : &[&[&[u8]];1] = &[&seeds[..]];
+        let cpi = CpiContext::new_with_signer(
+            ctx.accounts.system_program.to_account_info(), 
+            ctx_accounts,
+            pda_signer,
+        );
         transfer(cpi, amount)
     }
 }
