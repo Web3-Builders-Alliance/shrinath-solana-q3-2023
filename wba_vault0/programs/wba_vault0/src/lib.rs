@@ -7,6 +7,9 @@ use anchor_spl::token::Token;
 use anchor_spl::token::TokenAccount;
 use anchor_spl::token::transfer as spl_transfer;
 use anchor_spl::token::Transfer as SplTransfer;
+use anchor_spl::token::CloseAccount as SplCloseAccount;
+use anchor_spl::token::close_account as spl_close_account;
+
 
 
 declare_id!("Dq4UUdY4UBb6BiLRnRXBoF6xW7VZ9FKWNHZY94Zs4YmW");
@@ -66,7 +69,7 @@ pub mod wba_vault {
     }
     pub fn spl_withdraw(ctx: Context<SplWithdraw>, amount: u64) -> Result<()> {
         let ctx_accounts = SplTransfer {
-            to : ctx.accounts.owner.to_account_info(),
+            to : ctx.accounts.owner_ata.to_account_info(),
             from : ctx.accounts.vault.to_account_info(),
             authority:ctx.accounts.auth.to_account_info(),
         };
@@ -84,29 +87,63 @@ pub mod wba_vault {
         spl_transfer(cpi, amount)
     }
 
-    // pub fn close_account(ctx : Context<CloseAccount>) -> Result<()> {
-    //     match ctx.accounts.vault.try_lamports(){
-    //         Ok(amount) => {
-    //             let ctx_accounts = Transfer {
-    //                 to : ctx.accounts.owner.to_account_info(),
-    //                 from : ctx.accounts.vault.to_account_info(),
-    //             };
-    //             let seeds : &[&[u8]; 3] = &[
-    //                 b"vault",
-    //                 ctx.accounts.owner.to_account_info().key.as_ref(),
-    //                 &[ctx.accounts.state.vault_bump],
-    //             ];
-    //             let pda_signer : &[&[&[u8]];1] = &[&seeds[..]];
-    //             let cpi = CpiContext::new_with_signer(
-    //                 ctx.accounts.system_program.to_account_info(), 
-    //                 ctx_accounts,
-    //                 pda_signer,
-    //             );
-    //             transfer(cpi, amount)?;
-    //         },
-    //         Err(_) => ()
-    //     }
-    // }
+    pub fn close_account(ctx : Context<CloseAccount>) -> Result<()> {
+        match ctx.accounts.vault.try_lamports(){
+            Ok(amount) => {
+                let ctx_accounts = Transfer {
+                    to : ctx.accounts.owner.to_account_info(),
+                    from : ctx.accounts.vault.to_account_info(),
+                };
+                let seeds : &[&[u8]; 3] = &[
+                    b"vault",
+                    ctx.accounts.owner.to_account_info().key.as_ref(),
+                    &[ctx.accounts.state.vault_bump],
+                ];
+                let pda_signer : &[&[&[u8]];1] = &[&seeds[..]];
+                let cpi = CpiContext::new_with_signer(
+                    ctx.accounts.system_program.to_account_info(), 
+                    ctx_accounts,
+                    pda_signer,
+                );
+                transfer(cpi, amount)?;
+            },
+            Err(_) => (),
+        }
+
+        let seeds : &[&[u8]; 3] = &[
+            b"auth",
+            ctx.accounts.state.to_account_info().key.as_ref(),
+            &[ctx.accounts.state.auth_bump],
+        ];
+        let signer_seeds : &[&[&[u8]];1] = &[&seeds[..]];
+        if ctx.accounts.spl_vault.amount > 0 {
+            let ctx_accounts = SplTransfer {
+                to : ctx.accounts.owner_ata.to_account_info(),
+                from : ctx.accounts.spl_vault.to_account_info(),
+                authority:ctx.accounts.auth.to_account_info(),
+            };
+            
+            
+            let cpi = CpiContext::new_with_signer(
+                ctx.accounts.system_program.to_account_info(), 
+                ctx_accounts,
+                signer_seeds,
+            );
+            spl_transfer(cpi, ctx.accounts.spl_vault.amount.clone())?;
+        }
+
+        let close_account_spl = SplCloseAccount {
+            account:ctx.accounts.spl_vault.to_account_info(),
+            destination:ctx.accounts.owner.to_account_info(),
+            authority: ctx.accounts.auth.to_account_info(),
+        };
+        let cpi = CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            close_account_spl,
+            signer_seeds,
+        );
+        spl_close_account(cpi)
+    }
 }
 
 #[derive(Accounts)]
