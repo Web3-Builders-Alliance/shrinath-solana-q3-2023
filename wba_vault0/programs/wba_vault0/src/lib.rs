@@ -9,7 +9,7 @@ use anchor_spl::token::transfer as spl_transfer;
 use anchor_spl::token::Transfer as SplTransfer;
 
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("Dq4UUdY4UBb6BiLRnRXBoF6xW7VZ9FKWNHZY94Zs4YmW");
 
 #[program]
 pub mod wba_vault {
