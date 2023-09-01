@@ -38,7 +38,6 @@ describe('wba-vault0', () => {
     await anchor.AnchorProvider.env().connection
       .requestAirdrop(owner.publicKey, solAmount)
       .then(confirmTx);
-
   });
 
   it("Is initialized!", async () => {
