@@ -40,6 +40,9 @@ pub mod escrow {
         ctx.accounts.close_vault()
     }
 
+    pub fn update(ctx: Context<Update>, offer_amount: u64)->Result<()> {
+        ctx.accounts.update(offer_amount)
+    }
 
 }
 
@@ -139,6 +142,28 @@ pub struct Take<'info> {
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
+
+#[derive(Accounts)]
+pub struct Update<'info> {
+    #[account(mut)]
+    pub maker: Signer<'info>,
+    pub new_taker_token: Box<Account<'info, Mint>>,
+    #[account(
+        mut,
+        seeds= [b"escrow", maker.key().as_ref(),escrow.seed.to_le_bytes().as_ref()],
+        bump=escrow.escrow_bump,
+    )]
+    pub escrow: Box<Account<'info, Escrow>>,
+}
+
+impl <'info> Update<'info> {
+    pub fn update(&mut self, offer_amount: u64)->Result<()> {
+        self.escrow.taker_token = self.new_taker_token.key();
+        self.escrow.offer_amount = offer_amount;
+        Ok(())
+    }
+}
+
 
 impl<'info> Take<'info>{
     pub fn deposit_to_maker(&self)-> Result<()>{
