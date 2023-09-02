@@ -44,6 +44,11 @@ pub mod escrow {
         ctx.accounts.update(offer_amount)
     }
 
+    pub fn refund(ctx:Context<Refund>)->Result<()>{
+        ctx.accounts.empty_vault()?;
+        ctx.accounts.close_vault()
+    }
+
 }
 
 #[derive(Accounts)]
@@ -156,6 +161,81 @@ pub struct Update<'info> {
     pub escrow: Box<Account<'info, Escrow>>,
 }
 
+#[derive(Accounts)]
+pub struct Refund<'info> {
+    #[account(mut)]
+    pub maker: Signer<'info>,
+    #[account(
+        mut,
+        associated_token::mint = maker_token,
+        associated_token::authority = maker
+    )]
+    pub maker_ata: Account<'info, TokenAccount>,
+    pub maker_token: Box<Account<'info, Mint>>,
+    #[account(
+        seeds = [b"auth", escrow.key().as_ref()],
+        bump = escrow.auth_bump
+    )]
+    /// CHECK: this is safe
+    pub auth: UncheckedAccount<'info>,
+    #[account(
+        mut,
+        seeds=[b"vault", escrow.key().as_ref()],
+        token::mint= maker_token,
+        token::authority= auth,  
+        bump = escrow.vault_bump,
+    )]
+    pub vault: Account<'info, TokenAccount>,
+    #[account(
+        seeds= [b"escrow", maker.key().as_ref(),escrow.seed.to_le_bytes().as_ref()],
+        bump = escrow.escrow_bump,
+    )]
+    pub escrow: Box<Account<'info, Escrow>>,
+    pub token_program: Program<'info, Token>,
+    pub associate_token_program: Program<'info, AssociatedToken>,
+    pub system_program: Program<'info, System>,
+}
+
+impl<'info> Refund<'info> {
+    pub fn empty_vault(&self)->Result<()>{
+        let ctx_accounts = SplTransfer {
+            from : self.vault.to_account_info(),
+            to : self.maker_ata.to_account_info(),
+            authority:self.auth.to_account_info(),
+        };
+        let seeds : &[&[u8]; 2] = &[
+            b"auth",
+            &[self.escrow.auth_bump],
+        ];
+        let pda_signer : &[&[&[u8]];1] = &[&seeds[..]];
+        let cpi = CpiContext::new_with_signer(
+            self.token_program.to_account_info(),
+            ctx_accounts,
+            pda_signer,
+        );
+        spl_transfer(cpi, self.vault.amount)
+    }
+
+    pub fn close_vault(&self)->Result<()> {
+        let ctx_accounts = SplCloseAccount {
+            account : self.vault.to_account_info(),
+            destination: self.maker.to_account_info(),
+            authority:self.auth.to_account_info(),
+        };
+        let seeds : &[&[u8]; 2] = &[
+            b"auth",
+            &[self.escrow.auth_bump],
+        ];
+        let pda_signer : &[&[&[u8]];1] = &[&seeds[..]];
+        let cpi = CpiContext::new_with_signer(
+            self.token_program.to_account_info(),
+            ctx_accounts,
+            pda_signer,
+        );
+        spl_close_account(cpi)
+    }
+}
+
 impl <'info> Update<'info> {
     pub fn update(&mut self, offer_amount: u64)->Result<()> {
         self.escrow.taker_token = self.new_taker_token.key();
@@ -163,7 +243,6 @@ impl <'info> Update<'info> {
         Ok(())
     }
 }
-
 
 impl<'info> Take<'info>{
     pub fn deposit_to_maker(&self)-> Result<()>{
@@ -218,8 +297,6 @@ impl<'info> Take<'info>{
     }
 
 }
-
-
 
 #[account]
 pub struct Escrow {
