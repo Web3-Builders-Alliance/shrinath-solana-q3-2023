@@ -12,10 +12,14 @@ pub mod amm {
 
     pub fn initialize(ctx: Context<Initialise>, 
         seed : u64,
-        authority : Option<Pubkey>,
+        has_authority : bool,
         fee : u16,
     ) -> Result<()> {
-        ctx.accounts.init(seed, authority, fee, &ctx.bumps);
+        ctx.accounts.init(seed, has_authority, fee, &ctx.bumps);
         Ok(())
+    }
+
+    pub fn update(ctx: Context<Update>, locked : bool) ->Result<()> {
+        ctx.accounts.update(locked)
     }
 }

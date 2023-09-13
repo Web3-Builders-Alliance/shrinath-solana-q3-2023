@@ -10,4 +10,6 @@ pub enum AmmError {
     InvalidConfigBump,
     #[msg("invalid lp bump")]
     InvalidLpBump,
+    #[msg("don't have authority to update")]
+    InvalidAuthority,
 }

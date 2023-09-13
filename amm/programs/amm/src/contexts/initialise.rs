@@ -2,7 +2,7 @@ use crate::{errors::AmmError, state::Config};
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token_interface::{Mint, TokenInterface},
+    token_interface::{Mint, TokenInterface}, token::TokenAccount,
 };
 use std::collections::BTreeMap;
 
@@ -28,14 +28,14 @@ pub struct Initialise<'info> {
         associated_token::mint = mint_x,
         associated_token::authority = auth,
     )]
-    pub vault_x : Interface<'info, TokenInterface>,
+    pub vault_x : InterfaceAccount<'info, TokenAccount>,
     #[account(
         init_if_needed,
         payer = initialiser,
         associated_token::mint = mint_y,
         associated_token::authority = auth,
     )]
-    pub vault_y : Interface<'info, TokenInterface>,
+    pub vault_y : InterfaceAccount<'info, TokenAccount>,
     #[account(
         seeds = [b"auth", config.key().as_ref()], 
         bump
@@ -45,7 +45,7 @@ pub struct Initialise<'info> {
     #[account(
         init,
         payer = initialiser,
-        seeds = [b"config", seed.to_le_bytes().as_ref()],
+        seeds = [b"config", initialiser.key().as_ref(), seed.to_le_bytes().as_ref()],
         bump,
         space = Config::LEN,
     )]
@@ -60,7 +60,7 @@ impl<'info> Initialise<'info> {
     pub fn init(
         &mut self,
         seed : u64,
-        authority : Option<Pubkey>,
+        has_authority : bool,
         fee : u16,
         bumps : &BTreeMap<String, u8>
     ) ->Result<()> {
@@ -72,7 +72,7 @@ impl<'info> Initialise<'info> {
         );
         self.config.init(
             seed, 
-            authority, 
+            has_authority, 
             self.mint_x.key(),
             self.mint_y.key(), 
             fee, 

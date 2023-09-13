@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 #[account]
 pub struct Config {
     pub seed: u64,
-    pub authority: Option<Pubkey>,
+    pub has_authority: bool,
     pub mint_x: Pubkey, 
     pub mint_y: Pubkey, 
     pub fee: u16,
@@ -14,11 +14,11 @@ pub struct Config {
 }
 
 impl Config {
-    pub const LEN:usize = 8 + 8 + 1 + 32*3 + 2 + 1 + 1*3;
+    pub const LEN:usize = 8 + 8 + 32*2 + 2 + 1*2 + 1*3;
 
     pub fn init (&mut self, 
         seed: u64,
-        authority: Option<Pubkey>,
+        has_authority: bool,
         mint_x: Pubkey, 
         mint_y: Pubkey, 
         fee: u16,
@@ -27,7 +27,7 @@ impl Config {
         lp_bump:u8,
     ) {
         self.seed = seed;
-        self.authority = authority;
+        self.has_authority = has_authority;
         self.mint_x = mint_x;
         self.mint_y = mint_y;
         self.fee = fee;
