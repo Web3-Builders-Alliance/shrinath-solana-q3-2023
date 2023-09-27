@@ -6,6 +6,7 @@ pub struct Update<'info> {
     #[account(mut)]
     pub authority : Signer<'info>,
     #[account(
+        mut,
         seeds = [b"config",authority.key().as_ref(), config.seed.to_le_bytes().as_ref()],
         bump = config.config_bump,
     )]
