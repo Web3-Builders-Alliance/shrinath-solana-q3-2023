@@ -1,33 +1,31 @@
-import { Keypair,Connection, Commitment } from "@solana/web3.js";
-import { Metaplex, keypairIdentity, bundlrStorage, toMetaplexFile } from "@metaplex-foundation/js";
-import wallet from "../pre-req/wba-wallet.json";
-import { readFile } from "fs/promises";
+import wallet from "../wallet.json";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults"
+import { createGenericFile, createSignerFromKeypair, signerIdentity } from "@metaplex-foundation/umi"
+import { irysUploader } from "@metaplex-foundation/umi-uploader-irys"
+import { readFile } from "fs/promises"
 
-const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
+// Create a devnet connection
+const umi = createUmi('https://api.devnet.solana.com');
 
-const commitment:Commitment = "confirmed";
-const connection = new Connection("https://api.devnet.solana.com", commitment);
+let keypair = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(wallet));
+const signer = createSignerFromKeypair(umi, keypair);
 
-const metaplex = Metaplex.make(connection)
-    .use(keypairIdentity(keypair))
-    .use(bundlrStorage({
-        address:'https://devnet.bundlr.network',
-        providerUrl:'https://api.devnet.solana.com',
-        timeout:60000,
-    }));
+umi.use(irysUploader());
+umi.use(signerIdentity(signer));
 
+(async () => {
+    try {
+        const image = await readFile("/home/arjun/WBA/class1/solana-starter/ts/cluster1/hamilton.jpg");
+        const file = createGenericFile(image, "hamilton.jpg", {
+            contentType: "image/jpg",
+          })
 
-(async()=>{
-    try{
-        const img = await readFile("./images/generug.png");
-        const metaplexFile = toMetaplexFile(img, "generug.png");
-        const imageUri = await metaplex.storage().upload(metaplexFile);
+        const [myUri] = await umi.uploader.upload([file]);
 
-        console.log(`img has been uploaded at : ${imageUri}`);
-    }catch(e){
-        console.error(`something went wrong ${e}`);
+        
+        console.log("Your image URI: ", myUri);
+    }
+    catch(error) {
+        console.log("Oops.. Something went wrong", error);
     }
 })();
-
-
-//image uri :  https://2nubsue4krykjjvaaviqsykkcjhvmxsbo5yvma3gnj2nbwuxlzoa.arweave.net/02gZUJxUcKSmoAVRCWFKEk9WXkF3cVYDZmp00NqXXlw

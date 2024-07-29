@@ -22,11 +22,14 @@
     "nft_mint": "ts-node ./nft/nft_mint"
   },
   "dependencies": {
-    "@metaplex-foundation/js": "^0.19.4",
-    "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
-    "@coral-xyz/anchor": "^0.28.0",
-    "@solana/spl-token": "^0.3.8",
-    "@solana/web3.js": "^1.78.4",
+    "@coral-xyz/anchor": "0.29.0",
+    "@metaplex-foundation/js": "^0.20.1",
+    "@metaplex-foundation/mpl-token-metadata": "3.1.1",
+    "@metaplex-foundation/umi": "^0.8.10",
+    "@metaplex-foundation/umi-bundle-defaults": "^0.8.10",
+    "@metaplex-foundation/umi-uploader-irys": "^0.9.1",
+    "@solana/spl-token": "^0.3.9",
+    "@solana/web3.js": "^1.87.6",
     "@types/node": "^20.5.0",
     "bs58": "^5.0.0",
     "typescript": "^5.1.6"

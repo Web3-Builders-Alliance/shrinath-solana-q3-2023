@@ -1,39 +1,50 @@
-// image URI =  https://2nubsue4krykjjvaaviqsykkcjhvmxsbo5yvma3gnj2nbwuxlzoa.arweave.net/02gZUJxUcKSmoAVRCWFKEk9WXkF3cVYDZmp00NqXXlw
+import wallet from "../wallet.json";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults"
+import { createGenericFile, createSignerFromKeypair, signerIdentity } from "@metaplex-foundation/umi"
+import { irysUploader } from "@metaplex-foundation/umi-uploader-irys"
 
-import { Keypair,Connection, Commitment } from "@solana/web3.js";
-import { Metaplex, keypairIdentity, bundlrStorage} from "@metaplex-foundation/js";
-import wallet from "../pre-req/wba-wallet.json";
+// Create a devnet connection
+const umi = createUmi('https://api.devnet.solana.com');
 
-const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
+let keypair = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(wallet));
+const signer = createSignerFromKeypair(umi, keypair);
 
-const commitment:Commitment = "confirmed";
-const connection = new Connection("https://api.devnet.solana.com", commitment);
+umi.use(irysUploader());
+umi.use(signerIdentity(signer));
 
-const metaplex = Metaplex.make(connection)
-    .use(keypairIdentity(keypair))
-    .use(bundlrStorage({
-        address:'https://devnet.bundlr.network',
-        providerUrl:'https://api.devnet.solana.com',
-        timeout:60000,
-    }));
-
-(async()=>{
+(async () => {
     try {
-        const {uri, metadata} =await metaplex
-        .nfts()
-        .uploadMetadata({
-            name: "resiquents generug",
-            description: "this is generug img created by dean's rug generator",
-            image: "https://2nubsue4krykjjvaaviqsykkcjhvmxsbo5yvma3gnj2nbwuxlzoa.arweave.net/02gZUJxUcKSmoAVRCWFKEk9WXkF3cVYDZmp00NqXXlw",
-        });
-        console.log(`successfully created metadata :\n
-         **uri**\n${uri}\n
-         **metadata**\n${metadata}`);
+        // Follow this JSON structure
+        // https://docs.metaplex.com/programs/token-metadata/changelog/v1.0#json-structure
 
-    } catch (error) {
-        console.log(`something went wrong : ${error}`)
+        const image = "https://arweave.net/ZZ6KbkRmPYXNukUOv-qsNF5E2Ix-wUpSyYMPJVXeqA8"
+        const metadata = {
+            name: "Lewis Hamilton's Monster",
+            symbol: "HAM",
+            description: "Bono we're out of tyres",
+            image,
+            attributes: [
+                {trait_type: 'Color', value: 'Ham purple'},
+                {trait_type: 'Size', value: 'Ask Merc'},
+                {trait_type: 'Material', value: 'Wakanda steel'},
+                {trait_type: 'Magic', value: 'Yes'},
+                {trait_type: 'Tyres', value: 'No'}
+            ],
+            properties: {
+                files: [
+                    {
+                        type: "image/png",
+                        uri: image
+                    },
+                ]
+            },
+            creators: []
+        };
+        
+        const myUri = await umi.uploader.uploadJson(metadata);
+        console.log("Your image URI: ", myUri);
+    }
+    catch(error) {
+        console.log("Oops.. Something went wrong", error);
     }
 })();
-
-
-// metadata URI = https://arweave.net/giuyRgVvsd3CdMfbYEpxHFlfoeiokAhwLZJDKu_QwAc

@@ -1,37 +1,33 @@
-// metadata URI = https://arweave.net/giuyRgVvsd3CdMfbYEpxHFlfoeiokAhwLZJDKu_QwAc
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults"
+import { createSignerFromKeypair, signerIdentity, generateSigner, percentAmount } from "@metaplex-foundation/umi"
+import { createNft, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
 
-import { Keypair,Connection, Commitment } from "@solana/web3.js";
-import { Metaplex, keypairIdentity, bundlrStorage} from "@metaplex-foundation/js";
-import wallet from "../pre-req/wba-wallet.json";
+import wallet from "../wallet.json";
+import base58 from "bs58";
 
-const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
+const RPC_ENDPOINT = "https://api.devnet.solana.com";
+const umi = createUmi(RPC_ENDPOINT);
 
-const commitment:Commitment = "confirmed";
-const connection = new Connection("https://api.devnet.solana.com", commitment);
+let keypair = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(wallet));
+const myKeypairSigner = createSignerFromKeypair(umi, keypair);
+umi.use(signerIdentity(myKeypairSigner));
+umi.use(mplTokenMetadata())
 
-const metaplex = Metaplex.make(connection)
-    .use(keypairIdentity(keypair))
-    .use(bundlrStorage({
-        address:'https://devnet.bundlr.network',
-        providerUrl:'https://api.devnet.solana.com',
-        timeout:60000,
-    }));
+const mint = generateSigner(umi);
 
-(async()=>{
-    try {
-        const {nft} =await metaplex
-        .nfts()
-        .create({
-            uri:"https://arweave.net/giuyRgVvsd3CdMfbYEpxHFlfoeiokAhwLZJDKu_QwAc",
-            name:"resiquents generug",
-            sellerFeeBasisPoints:0,
-        });
-        
-        console.log(`Success! Check out your NFT here:\nhttps://explorer.solana.com/address/${nft.address.toBase58()}?cluster=devnet`);
+(async () => {
+        let tx = createNft(umi, {
+            
+                mint,
+                name: "Lewis Hamilton's Monster",
+                symbol:'HAM',
+                uri: 'https://arweave.net/NODbYmfsQktn4ovP_YOYFvh1gp--cxCMrLMYvMPSvC4',
+                sellerFeeBasisPoints: percentAmount(25),
+        })
+    let result = await tx.sendAndConfirm(umi);
+    const signature = base58.encode(result.signature);
+    
+    console.log(`Succesfully Minted! Check out your TX here:\nhttps://explorer.solana.com/tx/${signature}?cluster=devnet`)
 
-    } catch (error) {
-        console.log(`something went wrong : ${error}`)
-    }
+    console.log("Mint Address: ", mint.publicKey);
 })();
-
-// mint = https://explorer.solana.com/address/GqVXkAgPrxYwucqBLL3ro5Zxhtu2TREnpCwZ1S9oSDzf/metadata?cluster=devnet

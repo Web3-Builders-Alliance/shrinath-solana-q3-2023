@@ -1,6 +1,7 @@
 import { Keypair, PublicKey, Connection, Commitment } from "@solana/web3.js";
 import { getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token';
-import wallet from "../pre-req/wba-wallet.json"
+import wallet from "../wallet.json";
+
 
 // Import our keypair from the wallet file
 const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
@@ -12,7 +13,7 @@ const connection = new Connection("https://api.devnet.solana.com", commitment);
 const token_decimals = 1_000_000;
 
 
-const mint = new PublicKey("BfnBLUYWBjTwDDvkeLXMJ7VotmULsoHr88WtyZJSikhZ");
+const mint = new PublicKey("HuNqDTwj7WUTM1MKAJAEskrHaCuyrhHsXeTGKeA9EFc3");
 
 (async () => {
     try {
