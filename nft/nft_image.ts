@@ -10,12 +10,12 @@ const umi = createUmi('https://api.devnet.solana.com');
 let keypair = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(wallet));
 const signer = createSignerFromKeypair(umi, keypair);
 
-umi.use(irysUploader());
+umi.use(irysUploader({address: "https://devnet.irys.xyz/",}));
 umi.use(signerIdentity(signer));
 
 (async () => {
     try {
-        const image = await readFile("/home/arjun/WBA/class1/solana-starter/ts/cluster1/hamilton.jpg");
+        const image = await readFile("/home/resiquents/Documents/wba/shrinath-solana-q3-2023/images/generug.png");
         const file = createGenericFile(image, "hamilton.jpg", {
             contentType: "image/jpg",
           })

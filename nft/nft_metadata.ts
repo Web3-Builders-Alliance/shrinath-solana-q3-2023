@@ -17,18 +17,15 @@ umi.use(signerIdentity(signer));
         // Follow this JSON structure
         // https://docs.metaplex.com/programs/token-metadata/changelog/v1.0#json-structure
 
-        const image = "https://arweave.net/ZZ6KbkRmPYXNukUOv-qsNF5E2Ix-wUpSyYMPJVXeqA8"
+        const image = "https://devnet.irys.xyz/2e9JXSu7UYUe5XxMvvAE6Qu8LPfwHA8ENJBhc6UrNsGj"
         const metadata = {
             name: "Lewis Hamilton's Monster",
             symbol: "HAM",
-            description: "Bono we're out of tyres",
+            description: "hello hello 1 2 3",
             image,
             attributes: [
                 {trait_type: 'Color', value: 'Ham purple'},
                 {trait_type: 'Size', value: 'Ask Merc'},
-                {trait_type: 'Material', value: 'Wakanda steel'},
-                {trait_type: 'Magic', value: 'Yes'},
-                {trait_type: 'Tyres', value: 'No'}
             ],
             properties: {
                 files: [

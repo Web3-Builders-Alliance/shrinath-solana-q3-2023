@@ -13,16 +13,28 @@ const connection = new Connection("https://api.devnet.solana.com", commitment);
 const token_decimals = 1_000_000;
 
 
-const mint = new PublicKey("HuNqDTwj7WUTM1MKAJAEskrHaCuyrhHsXeTGKeA9EFc3");
+const mint = new PublicKey("29oXV5SdE3B3BLrb51Ef5HndVjuqWPGvCxxyaBtUuMRZ");
 
 (async () => {
     try {
         // Create an ATA
-        const ata = await getOrCreateAssociatedTokenAccount(connection, keypair,mint, keypair.publicKey);
+        const ata = await getOrCreateAssociatedTokenAccount(
+            connection,
+            keypair,
+            mint,
+            keypair.publicKey
+        );
         console.log(`Your ata is: ${ata.address.toBase58()}`);
 
         // Mint to ATA
-        const mintTx = await mintTo(connection,keypair,mint,ata.address,keypair.publicKey,100*token_decimals);
+        const mintTx = await mintTo(
+            connection,
+            keypair,
+            mint,
+            ata.address,
+            keypair.publicKey,
+            100*token_decimals
+        );
         console.log(`Your mint txid: ${mintTx}`);
     } catch(error) {
         console.log(`Oops, something went wrong: ${error}`)

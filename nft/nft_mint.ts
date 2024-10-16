@@ -17,11 +17,10 @@ const mint = generateSigner(umi);
 
 (async () => {
         let tx = createNft(umi, {
-            
                 mint,
-                name: "Lewis Hamilton's Monster",
-                symbol:'HAM',
-                uri: 'https://arweave.net/NODbYmfsQktn4ovP_YOYFvh1gp--cxCMrLMYvMPSvC4',
+                name: "resiquents",
+                symbol:'hehe',
+                uri: 'https://devnet.irys.xyz/ABMFcxBNtQCCkwMjzoYgjJ9WQLBkhrXhJvQ9JQzscyUQ',
                 sellerFeeBasisPoints: percentAmount(25),
         })
     let result = await tx.sendAndConfirm(umi);

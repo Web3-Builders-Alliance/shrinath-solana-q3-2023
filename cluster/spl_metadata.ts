@@ -65,6 +65,8 @@ import {
 
 } from "@metaplex-foundation/mpl-token-metadata";
 import { createSignerFromKeypair, signerIdentity, publicKey } from "@metaplex-foundation/umi";
+import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
+import { sign } from "crypto";
 
 // Define our Mint address
 const mint = publicKey("HuNqDTwj7WUTM1MKAJAEskrHaCuyrhHsXeTGKeA9EFc3")
@@ -77,8 +79,10 @@ umi.use(signerIdentity(createSignerFromKeypair(umi, keypair)));
 
 (async () => {
     try {
+        // Start here
         let accounts: CreateMetadataAccountV3InstructionAccounts = {
-            mint, mintAuthority:signer
+            mint,
+            mintAuthority:signer
         }
 
         let data: DataV2Args = {
@@ -93,7 +97,7 @@ umi.use(signerIdentity(createSignerFromKeypair(umi, keypair)));
 
         let args: CreateMetadataAccountV3InstructionArgs = {
             data: data,
-            isMutable:true,
+            isMutable: true,
             collectionDetails: null
         }
 
@@ -106,7 +110,7 @@ umi.use(signerIdentity(createSignerFromKeypair(umi, keypair)));
         )
 
         let result = await tx.sendAndConfirm(umi);
-        console.log(umi.transactions.deserialize(result.signature));
+        console.log(bs58.encode(result.signature));
     } catch(e) {
         console.error(`Oops, something went wrong: ${e}`)
     }
